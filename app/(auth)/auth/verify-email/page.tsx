@@ -7,7 +7,10 @@ import { verifyCredentialsEmailAction } from "@/actions/auth/verify-credentials-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { findVerificationTokenByToken } from "@/data-access/verification-token-queries";
+import {
+  deleteVerificationTokenByIdentifier,
+  findVerificationTokenByToken,
+} from "@/data-access/verification-token-queries";
 
 type PageProps = {
   searchParams: {
@@ -64,12 +67,16 @@ async function VerificationContent({ token }: { token: string }) {
   try {
     const verificationToken = await findVerificationTokenByToken(token);
 
+    if (!verificationToken) {
+      return <TokenIsInvalidState />;
+    }
+
     if (!verificationToken?.expires) {
       return <TokenIsInvalidState />;
     }
 
     const isExpired = new Date(verificationToken.expires) < new Date(Date.now() - 24 * 60 * 60 * 1000);
-    console.log(isExpired);
+
     if (isExpired) {
       return <TokenIsInvalidState />;
     }
@@ -78,7 +85,7 @@ async function VerificationContent({ token }: { token: string }) {
     if (!res.success) {
       return <TokenIsInvalidState />;
     }
-
+    await deleteVerificationTokenByIdentifier(verificationToken?.identifier);
     return <VerificationSuccess />;
   } catch (error) {
     return <TokenIsInvalidState />;

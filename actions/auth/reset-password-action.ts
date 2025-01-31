@@ -1,13 +1,13 @@
 "use server";
 
-import { z } from 'zod'
 import argon2 from "argon2";
 import { eq } from "drizzle-orm";
 import db from "@/database/db";
 import { users, verificationTokens } from "@/database/schema";
 import { findUserByEmail } from "@/data-access/auth.queries";
-import { findVerificationTokenByToken } from "@/data-access/verification-token-queries";
+import { deleteVerificationTokenByIdentifier, findVerificationTokenByToken } from "@/data-access/verification-token-queries";
 import { ResetPasswordSchema } from '@/validators/auth.validators';
+import { lower } from '@/database/schema/auth.schema';
 
 type Res =
   | { success: true }
@@ -33,7 +33,11 @@ export async function resetPasswordAction(
 
   const existingToken = await findVerificationTokenByToken(token);
 
+
   if (!existingToken?.expires) {
+    //  delete expired token from the table
+    await deleteVerificationTokenByIdentifier(email)
+
     return {
       success: false,
       error: "Token is invalid",
@@ -42,6 +46,7 @@ export async function resetPasswordAction(
   }
 
   if (new Date(existingToken.expires) < new Date()) {
+    await deleteVerificationTokenByIdentifier(email)
     return {
       success: false,
       error: "Token is expired",
@@ -70,6 +75,7 @@ export async function resetPasswordAction(
       .set({ password: hashedPassword })
       .where(eq(users.email, email));
 
+    await deleteVerificationTokenByIdentifier(email)
     return { success: true };
   } catch (err) {
     console.error(err);

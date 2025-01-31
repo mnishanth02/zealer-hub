@@ -2,28 +2,22 @@
 
 import { useState } from "react";
 
-import { valibotResolver } from "@hookform/resolvers/valibot";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { forgotPasswordAction } from "@/actions/auth/forgot-password-action";
+import AppDialog from "@/components/common/app-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ForgotPasswordInput, ForgotPasswordSchema } from "@/validators/auth.validators";
 
 export const ForgotPasswordForm = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [success, setSuccess] = useState("");
 
   const form = useForm<ForgotPasswordInput>({
-    resolver: valibotResolver(ForgotPasswordSchema),
+    resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: { email: "" },
   });
 
@@ -31,7 +25,6 @@ export const ForgotPasswordForm = () => {
 
   const submit = async (values: ForgotPasswordInput) => {
     setSuccess("");
-
     const res = await forgotPasswordAction(values);
 
     if (res.success) {
@@ -40,9 +33,7 @@ export const ForgotPasswordForm = () => {
       switch (res.statusCode) {
         case 400:
           const nestedErrors = res.error.nested;
-
           if (nestedErrors && "email" in nestedErrors) {
-            // setError("email", { message: nestedErrors.email?.[0] });
             setError("email", { message: nestedErrors.email?.toString() });
           } else {
             setError("email", { message: "Internal Server Error" });
@@ -59,47 +50,50 @@ export const ForgotPasswordForm = () => {
     }
   };
 
-  return (
-    <Dialog>
-      Forgot your password? Click{" "}
-      <DialogTrigger asChild>
-        <Button variant="link" size="sm" className="px-0">
-          here
+  const formContent = (
+    <Form {...form}>
+      <form className="space-y-4">
+        <FormField
+          control={control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" {...field} disabled={!!success} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {success && <p className="text-sm font-medium text-primary">{success}</p>}
+
+        <Button
+          type="button"
+          onClick={handleSubmit(submit)}
+          disabled={formState.isSubmitting || !!success}
+          className="w-full"
+        >
+          Send Password Reset Email
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Enter Your Email</DialogTitle>
+      </form>
+    </Form>
+  );
 
-          <DialogDescription>We will send you an email with a link to reset your password.</DialogDescription>
-
-          <div className="my-2 h-1 bg-muted" />
-
-          <Form {...form}>
-            <form onSubmit={handleSubmit(submit)} className="space-y-4">
-              <FormField
-                control={control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} disabled={!!success} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {success && <p className="text-sm font-medium text-green-600">{success}</p>}
-
-              <Button type="submit" disabled={formState.isSubmitting || !!success} className="w-full">
-                Send Password Reset Email
-              </Button>
-            </form>
-          </Form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+  return (
+    <AppDialog
+      trigger={
+        <Button variant="link" className="flex justify-end p-0 text-sm text-primary hover:underline">
+          Forgot Password
+        </Button>
+      }
+      title="Enter Your Email"
+      message="We will send you an email with a link to reset your password."
+      open={isDialogOpen}
+      onOpenChange={setIsDialogOpen}
+      showButtons={false}
+      customContent={formContent}
+    />
   );
 };

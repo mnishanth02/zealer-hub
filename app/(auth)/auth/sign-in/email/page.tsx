@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { signinUserAction } from "@/actions/auth/signin-user-action";
+import { ForgotPasswordForm } from "@/app/(auth)/components/forgot-password-form";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ export default function SignInPage() {
     },
   });
 
-  const { handleSubmit, control, formState, setError, reset } = form;
+  const { handleSubmit, control, setError } = form;
 
   const onSubmit = async (values: SigninSchemaType) => {
     const response = await signinUserAction(values);
@@ -50,7 +51,7 @@ export default function SignInPage() {
       <h1 className={cn("text-center text-3xl font-bold")}>Sign In</h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={control}
             name="email"
@@ -74,12 +75,8 @@ export default function SignInPage() {
                 <FormControl>
                   <div className="flex flex-col">
                     <Input {...field} className="w-full" placeholder="Enter your password" type="password" />
-                    <Link
-                      href="/auth/sign-in/forgot-password"
-                      className={cn("flex justify-end text-sm text-primary hover:underline")}
-                    >
-                      Forgot Password
-                    </Link>
+
+                    <ForgotPasswordForm />
                   </div>
                 </FormControl>
                 <FormMessage />

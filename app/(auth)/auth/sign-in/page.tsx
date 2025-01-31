@@ -18,9 +18,7 @@ export default function SignInPage() {
           <p className="text-gray-500 dark:text-gray-400">Sign in to your account using one of the options below.</p>
         </div>
         <div className="space-y-4">
-          {/* <Suspense fallback={<OAuthSigninButtonsSkeleton />}> */}
           <OAuthSigninButtons />
-          {/* </Suspense> */}
 
           <div className="relative py-4">
             <div className="absolute inset-0 flex items-center">
@@ -45,11 +43,6 @@ export default function SignInPage() {
           </div>
 
           <div className="flex justify-center">
-            {/* <Button asChild variant="ghost" className={cn("flex w-full items-center gap-2")}>
-              <Link href="/sign-in/email">
-                <Mail name="Mail" /> Sign in with Email
-              </Link>
-            </Button> */}
             <Link
               href="/auth/sign-in/email"
               className={cn(

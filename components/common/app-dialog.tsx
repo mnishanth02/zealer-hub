@@ -24,6 +24,9 @@ export interface AppDialogProps {
   primaryButton?: ButtonConfig;
   secondaryButton?: ButtonConfig;
   showSecondaryButton?: boolean;
+  showButtons?: boolean;
+  customContent?: React.ReactNode;
+  className?: string;
 }
 
 const AppDialog: React.FC<AppDialogProps> = ({
@@ -35,6 +38,9 @@ const AppDialog: React.FC<AppDialogProps> = ({
   primaryButton = { text: "Confirm", variant: "default" },
   secondaryButton = { text: "Cancel", variant: "secondary" },
   showSecondaryButton = true,
+  showButtons = true,
+  customContent,
+  className,
 }) => {
   const handlePrimaryClick = () => {
     if (primaryButton.onClick) {
@@ -57,21 +63,26 @@ const AppDialog: React.FC<AppDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className={`sm:max-w-lg ${className}`}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
-          {showSecondaryButton && (
-            <Button type="button" variant={secondaryButton.variant} onClick={handleSecondaryClick}>
-              {secondaryButton.text}
+
+        {customContent && <div className="my-4">{customContent}</div>}
+
+        {showButtons && (
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+            {showSecondaryButton && (
+              <Button type="button" variant={secondaryButton.variant} onClick={handleSecondaryClick}>
+                {secondaryButton.text}
+              </Button>
+            )}
+            <Button type="button" variant={primaryButton.variant} onClick={handlePrimaryClick}>
+              {primaryButton.text}
             </Button>
-          )}
-          <Button type="button" variant={primaryButton.variant} onClick={handlePrimaryClick}>
-            {primaryButton.text}
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,13 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { valibotResolver } from "@hookform/resolvers/valibot";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { resetPasswordAction } from "@/actions/auth/reset-password-action";
+import AppDialog from "@/components/common/app-dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ResetPasswordInput, ResetPasswordSchema } from "@/validators/auth.validators";
 
@@ -15,11 +17,13 @@ type ResetPasswordFormProps = { email: string; token: string };
 
 export const ResetPasswordForm = ({ email, token }: ResetPasswordFormProps) => {
   const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<ResetPasswordInput>({
-    resolver: valibotResolver(ResetPasswordSchema),
+    resolver: zodResolver(ResetPasswordSchema),
     defaultValues: {
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -29,7 +33,7 @@ export const ResetPasswordForm = ({ email, token }: ResetPasswordFormProps) => {
     const res = await resetPasswordAction(email, token, values);
 
     if (res.success) {
-      router.push("/auth/signin/reset-password/success");
+      setIsDialogOpen(true);
     } else {
       switch (res.statusCode) {
         case 400:
@@ -53,26 +57,67 @@ export const ResetPasswordForm = ({ email, token }: ResetPasswordFormProps) => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={handleSubmit(submit)} className="max-w-[400px] space-y-6">
-        <FormField
-          control={control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="e.g. ********" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <>
+      <Form {...form}>
+        <form onSubmit={handleSubmit(submit)} className="space-y-6">
+          <FormField
+            control={control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Password</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input type="password" placeholder="Enter your new password" className="pr-10" {...field} />
+                  </div>
+                </FormControl>
+                <FormDescription className="text-xs">
+                  Must be at least 8 characters with 1 number and 1 special character
+                </FormDescription>
+                <FormMessage className="text-sm" />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit" disabled={formState.isSubmitting} className="w-full">
-          Reset Password
-        </Button>
-      </form>
-    </Form>
+          <FormField
+            control={control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">Confirm Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="Confirm your new password" className="" {...field} />
+                </FormControl>
+                <FormMessage className="text-sm" />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit" disabled={formState.isSubmitting} className="w-full py-2.5 font-medium">
+            {formState.isSubmitting ? (
+              <>
+                <span className="mr-2">Resetting Password...</span>
+                <span className="animate-spin">⭗</span>
+              </>
+            ) : (
+              "Reset Password"
+            )}
+          </Button>
+        </form>
+      </Form>
+      <AppDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        title="Rest Password!"
+        message="Password has been reset successfully! Please sign in with your new password"
+        showSecondaryButton={false}
+        primaryButton={{
+          text: "Sign In",
+          variant: "default",
+          onClick: () => router.push("/auth/sign-in/email"),
+        }}
+        className="sm:max-w-md"
+      />
+    </>
   );
 };

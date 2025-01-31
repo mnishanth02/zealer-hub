@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { USER_ROLES } from "@/lib/constants";
 import { sendSignupUserEmail } from "@/actions/mail/send-signup-user-email";
 import db from "@/database/db";
-import { lower } from "@/database/schema/auth.schema";
+import { lower, verificationTokens } from "@/database/schema/auth.schema";
 import { createVerificationTokenAction } from "./create-verification-token-action";
 import { findAdminUserEmailAddresses } from "@/data-access/admin-user-email-address-queries";
 import { SignupSchema } from "@/validators/auth.validators";
@@ -40,6 +40,11 @@ export async function signupUserAction(values: unknown): Promise<Res> {
       .then((res) => res[0] ?? null);
 
     if (existingUser?.id) {
+      // Delete all existing verification tokens for this email
+      //  await db
+      //  .delete(verificationTokens)
+      //  .where(eq(lower(verificationTokens.identifier), email.toLowerCase()));
+
       if (!existingUser.emailVerified) {
         const verificationToken = await createVerificationTokenAction(
           existingUser.email,
