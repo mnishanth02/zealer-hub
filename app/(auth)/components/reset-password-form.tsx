@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ResetPasswordInput, ResetPasswordSchema } from "@/validators/auth.validators";
+import Loader from "@/components/common/loader";
 
 type ResetPasswordFormProps = { email: string; token: string };
 
@@ -97,7 +98,7 @@ export const ResetPasswordForm = ({ email, token }: ResetPasswordFormProps) => {
             {formState.isSubmitting ? (
               <>
                 <span className="mr-2">Resetting Password...</span>
-                <span className="animate-spin">⭗</span>
+                <Loader />
               </>
             ) : (
               "Reset Password"

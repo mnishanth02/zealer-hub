@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 
 import { signupUserAction } from "@/actions/auth/signup-user-action";
 import AppDialog from "@/components/common/app-dialog";
+import Loader from "@/components/common/loader";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ export default function SignUpPage() {
     },
   });
 
-  const { handleSubmit, control, setError } = form;
+  const { handleSubmit, control, setError, formState } = form;
 
   const onSubmit = async (values: SignupSchemaType) => {
     const response = await signupUserAction(values);
@@ -110,8 +111,15 @@ export default function SignUpPage() {
               )}
             />
 
-            <Button className="w-full" type="submit">
-              Sign Up
+            <Button disabled={formState.isSubmitting} className="w-full" type="submit">
+              {formState.isSubmitting ? (
+                <>
+                  <span className="mr-2">Signing Up...</span>
+                  <Loader />
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
         </Form>

@@ -6,7 +6,7 @@ import { findVerificationTokenByToken } from "@/data-access/verification-token-q
 
 import { ResetPasswordForm } from "../../components/reset-password-form";
 
-type PageProps = { searchParams: { token: string } };
+type PageProps = { searchParams: Promise<{ token: string }> };
 
 export default async function Page({ searchParams }: PageProps) {
   const { token } = await searchParams;

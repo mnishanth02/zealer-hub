@@ -38,7 +38,6 @@ export const OAuthSigninButtons = ({ signup }: OAuthSigninButtonsProps) => {
         variant="secondary"
         className="w-full"
         onClick={clickHandler.bind(null, "google")}
-        // onClick={() => clickHandler("google")}
       >
         <GoogleIcon className="mr-2 stroke-white" />
         {text} with Google

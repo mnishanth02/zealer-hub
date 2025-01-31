@@ -5,18 +5,29 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 
 import { verifyCredentialsEmailAction } from "@/actions/auth/verify-credentials-email-action";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   deleteVerificationTokenByIdentifier,
   findVerificationTokenByToken,
 } from "@/data-access/verification-token-queries";
 
-type PageProps = {
-  searchParams: {
-    token: string;
-  };
-};
+type PageProps = { searchParams: Promise<{ token: string }> };
+
+export default async function Page({ searchParams }: PageProps) {
+  const { token } = await searchParams;
+  if (!token) {
+    return <TokenIsInvalidState />;
+  }
+
+  return (
+    <main className="container py-8">
+      <Suspense fallback={<LoadingState />}>
+        <VerificationContent token={token} />
+      </Suspense>
+    </main>
+  );
+}
 
 const LoadingState = () => (
   <div className="flex items-center justify-center p-8">
@@ -90,19 +101,4 @@ async function VerificationContent({ token }: { token: string }) {
   } catch (error) {
     return <TokenIsInvalidState />;
   }
-}
-
-export default async function Page({ searchParams }: PageProps) {
-  const { token } = await searchParams;
-  if (!token) {
-    return <TokenIsInvalidState />;
-  }
-
-  return (
-    <main className="container py-8">
-      <Suspense fallback={<LoadingState />}>
-        <VerificationContent token={token} />
-      </Suspense>
-    </main>
-  );
 }
