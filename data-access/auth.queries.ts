@@ -39,6 +39,7 @@ export const findUserByEmail = async (
         .select()
         .from(users)
         .where(eq(lower(users.email), email.toLowerCase()))
+        .limit(1)
         .then((res) => res[0] ?? null);
 
     return user;
