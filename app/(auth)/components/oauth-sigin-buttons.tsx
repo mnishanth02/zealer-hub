@@ -34,12 +34,8 @@ export const OAuthSigninButtons = ({ signup }: OAuthSigninButtonsProps) => {
   const text = signup ? "Sign up" : "Sign in";
   return (
     <div className="max-w-[400px]">
-      <Button
-        variant="secondary"
-        className="w-full"
-        onClick={clickHandler.bind(null, "google")}
-      >
-        <GoogleIcon className="mr-2 stroke-white" />
+      <Button variant="default" className="w-full" onClick={clickHandler.bind(null, "google")}>
+        <GoogleIcon className="mr-2" />
         {text} with Google
       </Button>
 
